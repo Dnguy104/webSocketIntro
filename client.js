@@ -29,6 +29,7 @@ window.onload = function() {
     connection.onopen = function () {
         // first we want users to enter their names
         input.disabled = false;
+        input.focus();
         var txt = document.createTextNode('Choose name:');
         status.removeChild(status.firstChild);
         status.appendChild(txt);
@@ -68,6 +69,7 @@ window.onload = function() {
             input.disabled = false;  // let the user write another message
             addMessage(json.data.author, json.data.text,
                        json.data.color, new Date(json.data.time));
+            input.focus();
         } else {
             console.log('Hmm..., I\'ve never seen JSON like this: ', json);
         }

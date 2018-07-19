@@ -22,8 +22,9 @@ var clients = [ ];
  * Helper function for escaping input strings
  */
 function htmlEntities(str) {
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;')
-                      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    // return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    //                   .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    return str;
 }
 
 // Array with some colors
@@ -37,6 +38,7 @@ colors.sort(function(a,b) { return Math.random() > 0.5; } );
 var server = http.createServer(function(request, response) {
     // Not important for us. We're writing WebSocket server, not HTTP server
 });
+
 server.listen(webSocketsServerPort, function() {
     console.log((new Date()) + " Server is listening on port " + webSocketsServerPort);
 });
@@ -44,7 +46,7 @@ server.listen(webSocketsServerPort, function() {
 /**
  * WebSocket server
  */
-var wsServer = new webSocketServer({
+var webServer = new webSocketServer({
     // WebSocket server is tied to a HTTP server. WebSocket request is just
     // an enhanced HTTP request. For more info http://tools.ietf.org/html/rfc6455#page-6
     httpServer: server
@@ -52,7 +54,7 @@ var wsServer = new webSocketServer({
 
 // This callback function is called every time someone
 // tries to connect to the WebSocket server
-wsServer.on('request', function(request) {
+webServer.on('request', function(request) {
     console.log((new Date()) + ' Connection from origin ' + request.origin + '.');
 
     // accept connection - you should check 'request.origin' to make sure that
@@ -60,15 +62,21 @@ wsServer.on('request', function(request) {
     // (http://en.wikipedia.org/wiki/Same_origin_policy)
     var connection = request.accept(null, request.origin); 
     // we need to know client index to remove them on 'close' event
-    var index = clients.push(connection) - 1;
+    clients.push(connection);
+    var index = clients.length - 1;
     var userName = false;
     var userColor = false;
-
+    
+    console.log(index);
+    
     console.log((new Date()) + ' Connection accepted.');
+    
+    
+    var historyDisplay = history.slice(-100);
 
     // send back chat history
-    if (history.length > 0) {
-        connection.sendUTF(JSON.stringify( { type: 'history', data: history} ));
+    if (historyDisplay.length > 0) {
+        connection.sendUTF(JSON.stringify( { type: 'history', data: historyDisplay} ));
     }
 
     // user sent some message
@@ -80,6 +88,7 @@ wsServer.on('request', function(request) {
                 // get random color and send it back to the user
                 userColor = colors.shift();
                 connection.sendUTF(JSON.stringify({ type:'color', data: userColor }));
+                
                 console.log((new Date()) + ' User is known as: ' + userName
                             + ' with ' + userColor + ' color.');
 
@@ -95,10 +104,10 @@ wsServer.on('request', function(request) {
                     color: userColor
                 };
                 history.push(obj);
-                history = history.slice(-100);
 
                 // broadcast message to all connected clients
                 var json = JSON.stringify({ type:'message', data: obj });
+                
                 for (var i=0; i < clients.length; i++) {
                     clients[i].sendUTF(json);
                 }
