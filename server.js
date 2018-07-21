@@ -27,7 +27,6 @@ function htmlEntities(str) {
     return str;
 }
 
-// Array with some colors
 var colors = [ 'red', 'green', 'blue', 'magenta', 'purple', 'plum', 'orange' ];
 // ... in random order
 colors.sort(function(a,b) { return Math.random() > 0.5; } );
@@ -43,9 +42,6 @@ server.listen(webSocketsServerPort, function() {
     console.log((new Date()) + " Server is listening on port " + webSocketsServerPort);
 });
 
-/**
- * WebSocket server
- */
 var webServer = new webSocketServer({
     // WebSocket server is tied to a HTTP server. WebSocket request is just
     // an enhanced HTTP request. For more info http://tools.ietf.org/html/rfc6455#page-6
